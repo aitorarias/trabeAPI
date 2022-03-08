@@ -1,9 +1,16 @@
+require("dotenv").config();
 const { gql, UserInputError } = require("apollo-server");
+const jwt = require("jsonwebtoken");
+
 const operations = require("../data/operations");
+const users = require("../data/users");
 
 const resolvers = {
   Query: {
     getAccountAndMovements: () => operations,
+    me: (root, args, context) => {
+      return context.currentUser;
+    },
   },
   Mutation: {
     addDeposit: (_, args) => {
@@ -98,6 +105,24 @@ const resolvers = {
       };
       operations[0] = updateOperation;
       return updateOperation;
+    },
+    createUser: (_, args) => {
+      const username = { ...args };
+      users.push(username);
+      return username;
+    },
+    login: async (_, args) => {
+      const user = await users.find((user) => user.username === args.username);
+      if (!user || args.password !== "justTest") {
+        throw new UserInputError("Invalid credentials");
+      }
+      const identifier = {
+        username: user.username,
+        id: user.id,
+      };
+      return {
+        value: jwt.sign(identifier, process.env.JWT_SECRET),
+      };
     },
   },
 };
