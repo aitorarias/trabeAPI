@@ -6,6 +6,15 @@ const typeDefs = gql`
     WITHDRAW
   }
 
+  type User {
+    username: String!
+    id: ID!
+  }
+
+  type Token {
+    value: String!
+  }
+
   type Account {
     number: String!
     balance: Int!
@@ -23,11 +32,14 @@ const typeDefs = gql`
 
   type Query {
     getAccountAndMovements: [Account!]
+    me: User
   }
 
   type Mutation {
     addDeposit(number: String!, type: MovementTypes!, amount: Int!): Account!
     makeWithdraw(number: String!, type: MovementTypes!, amount: Int!): Account!
+    createUser(username: String!): User
+    login(username: String!, password: String!): Token
   }
 `;
 
